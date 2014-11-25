@@ -14,7 +14,7 @@ include_directories(common/include)
 include_directories(${OPEN_FOAM_INCLUDE_DIR})
 
 ## Boost
-set(Boost_NO_SYSTEM_PATHS ON)
+#set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
@@ -37,10 +37,6 @@ add_definitions(-DOF_VERSION=${OF_VERSION_TRIMMED})
 set(CONVERTERS
     OpenFoam2SpeedITCL
 )
-
-set(Boost_NO_SYSTEM_PATHS ON)
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS program_options REQUIRED)
 
 foreach(converter ${CONVERTERS})
         add_executable(${converter} ${converter})
