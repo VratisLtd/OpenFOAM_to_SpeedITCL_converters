@@ -38,11 +38,25 @@ void saveRelaxationParameter(const TField& F,
                              pt::ptree& settings)
 {
     std::string filed_name = F.name();
+#if (2 == OF_VERSION && 1 > OF_VERSION_MINOR ) || 1 == OF_VERSION
     if(F.mesh().relax(filed_name))
     {
         settings.put(std::string("relaxationFactors.")+filed_name,
                      F.mesh().relaxationFactor(filed_name));
     }
+#endif
+#if (2 == OF_VERSION && 1 <= OF_VERSION_MINOR )
+    if(F.mesh().relaxEquation(filed_name))
+    {
+        settings.put(std::string("relaxationFactors.")+filed_name,
+                     F.mesh().equationRelaxationFactor(filed_name));
+    }
+    if(F.mesh().relaxField(filed_name))
+    {
+        settings.put(std::string("relaxationFactors.")+filed_name,
+                     F.mesh().fieldRelaxationFactor(filed_name));
+    }
+#endif
 }
 
 void saveTurbulenceParameters(const IOdictionary& RASProperties,

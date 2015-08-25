@@ -14,7 +14,7 @@ include_directories(common/include)
 include_directories(${OPEN_FOAM_INCLUDE_DIR})
 
 ## Boost
-set(Boost_NO_SYSTEM_PATHS ON)
+#set(Boost_NO_SYSTEM_PATHS ON)
 set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
@@ -27,21 +27,25 @@ add_definitions(
     -DNoRepository -ftemplate-depth-100
 )
 
-#string(SUBSTRING $ENV{WM_PROJECT_VERSION} 0 1 OF_VERSION_TRIMMED)
+string(SUBSTRING $ENV{WM_PROJECT_VERSION} 0 1 OF_VERSION_TRIMMED)
 
-string(SUBSTRING "2.0.1" 0 1 OF_VERSION_TRIMMED)
-message(STATUS "OPEN FOAM VERSION: ${OF_VERSION_TRIMMED}")
+string(SUBSTRING $ENV{WM_PROJECT_VERSION} 2 1 OF_MINOR_TRIMMED)
+
+#string(SUBSTRING "2.0.1" 0 1 OF_VERSION_TRIMMED)
+message(STATUS "OPEN FOAM MAJOR VERSION: ${OF_VERSION_TRIMMED}")
+message(STATUS "OPEN FOAM MINOR VERSION: ${OF_MINOR_TRIMMED}")
 
 add_definitions(-DOF_VERSION=${OF_VERSION_TRIMMED})
+add_definitions(-DOF_VERSION_MINOR=${OF_MINOR_TRIMMED})
 
 set(CONVERTERS
     OpenFoam2SpeedITCL
 )
 
-set(Boost_NO_SYSTEM_PATHS ON)
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS program_options REQUIRED)
-
+#set(Boost_NO_SYSTEM_PATHS ON)
+#set(Boost_USE_STATIC_LIBS ON)
+#find_package(Boost COMPONENTS program_options REQUIRED)
+#
 foreach(converter ${CONVERTERS})
         add_executable(${converter} ${converter})
         target_link_libraries(${converter} converters_common)

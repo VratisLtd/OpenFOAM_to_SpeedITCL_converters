@@ -34,13 +34,22 @@ void OF2SpeeditclMeshWriter::saveMesh(fvMesh& mesh, const std::string& dir_path)
         vectorWriter.saveVec(file, mesh.deltaCoeffs().cdata(),
                          mesh.deltaCoeffs().size(), IFACE_DELTA_COEFFS_HEADER);
 
+#if (2 == OF_VERSION && 1 > OF_VERSION_MINOR ) || 1 == OF_VERSION
         if(!mesh.orthogonal())
         {
             vectorWriter.saveVec(file,
                                  internalValues(mesh.correctionVectors()),
                                  IFACE_CORRECTION_VEC_HEADER ) ;
         }
-
+#endif
+#if (2 == OF_VERSION && 1 <= OF_VERSION_MINOR )
+        if(!mesh.checkFaceOrthogonality())
+        {
+            vectorWriter.saveVec(file,
+                                 internalValues(mesh.nonOrthCorrectionVectors()),
+                                 IFACE_CORRECTION_VEC_HEADER ) ;
+        }
+#endif
         vectorWriter.saveVec(file, mesh.owner().cdata(), mesh.owner().size(),
                              IFACE_OWNERS_HEADER);
 
@@ -58,6 +67,7 @@ void OF2SpeeditclMeshWriter::saveMesh(fvMesh& mesh, const std::string& dir_path)
                              boundaryValues(mesh.deltaCoeffs(), true).vals,
                              BFACE_DELTA_COEFFS_HEADER);
 
+#if (2 == OF_VERSION && 1 > OF_VERSION_MINOR ) || 1 == OF_VERSION
         if(!mesh.orthogonal())
         {
 
@@ -79,6 +89,30 @@ void OF2SpeeditclMeshWriter::saveMesh(fvMesh& mesh, const std::string& dir_path)
                                                    true).vals,
                              BFACE_CORRECTION_VEC_HEADER);
         }
+#endif
+#if (2 == OF_VERSION && 1 <= OF_VERSION_MINOR )
+        if(!mesh.checkFaceOrthogonality())
+        {
+
+            auto& boundaryField = mesh.nonOrthCorrectionVectors().boundaryField();
+
+            for (int i = 0; i < boundaryField.size(); i++)
+                for (int j=0 ; j < boundaryField[i].size() ; j++)
+                {
+                    if (0 != boundaryField[i][j].x()
+                            || 0 != boundaryField[i][j].y()
+                            || 0 != boundaryField[i][j].z())
+                        throw std::string("boundary correction vectors "
+                                          "different than 0 are not supported"
+                                          " - do you try to use \"coupled\" "
+                                          "boundary faces ?") ;
+                }
+
+            vectorWriter.saveVec(file, boundaryValues(mesh.nonOrthCorrectionVectors(),
+                                                   true).vals,
+                             BFACE_CORRECTION_VEC_HEADER);
+        }
+#endif
 
         vectorWriter.saveVec(file, boundaryOwners(mesh), BFACE_OWNERS_HEADER);
 
@@ -105,14 +139,22 @@ void OF2SpeeditclMeshWriter::saveMeshDescription(Foam::fvMesh& mesh,
 
     file << "\n";
 
-    if(mesh.orthogonal())
-    {
-        file << "orthogonal\n";
-    }
-    else
-    {
-        file << "nonorthogonal\n";
-    }
+#if (2 == OF_VERSION && 1 > OF_VERSION_MINOR ) || 1 == OF_VERSION
+        if ( mesh.orthogonal() )
+        {
+            file << "orthogonal\n" ;
+        } else {
+            file << "nonorthogonal\n" ;
+        } ;
+#endif
+#if (2 == OF_VERSION && 1 <= OF_VERSION_MINOR )
+        if ( mesh.checkFaceOrthogonality() )
+        {
+            file << "orthogonal\n" ;
+        } else {
+            file << "nonorthogonal\n" ;
+        } ;
+#endif
 
     // Some kind of magic...
     Vector<scalar>::labelType validComponents(
