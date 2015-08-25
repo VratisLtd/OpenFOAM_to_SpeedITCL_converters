@@ -42,10 +42,6 @@ set(CONVERTERS
     OpenFoam2SpeedITCL
 )
 
-#set(Boost_NO_SYSTEM_PATHS ON)
-#set(Boost_USE_STATIC_LIBS ON)
-#find_package(Boost COMPONENTS program_options REQUIRED)
-#
 foreach(converter ${CONVERTERS})
         add_executable(${converter} ${converter})
         target_link_libraries(${converter} converters_common)
